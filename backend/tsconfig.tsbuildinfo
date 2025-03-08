@@ -1,0 +1,1 @@
+{"root":["./src/app.ts","./src/index.ts","./src/controllers/groupcontroller.ts","./src/controllers/usercontroller.ts","./src/middlewares/multer.ts","./src/middlewares/verifty.ts","./src/routes/grouproute.ts","./src/routes/userroute.ts","./src/utils/cloudinary.ts"],"version":"5.8.2"}

@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  username String 
+  email String 
+  password String 
+  profilePic String?
+  online Boolean
+  lastSeenOnline DateTime
+  groupAndUser GroupAndUser[]
+  groupJoiningReq GroupJoiningRequest[]
+  seenBy SeenBy[]
+}
+
+model Chat {
+  id Int @id @default(autoincrement())
+  content String  
+  type String // text, image, video, file
+  byWhichUser Int 
+  groupId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean
+  seenBy SeenBy[]
+  group Group @relation(fields: [groupId], references: [id])
+}
+
+model Group {
+  id Int @id @default(autoincrement())
+  name String
+  groupPic String?
+  isPrivate Boolean @default(true)
+  groupSize Int 
+  description String?
+  chat Chat[]
+  groupAndUser GroupAndUser[]
+  groupJoiningReq GroupJoiningRequest[]
+}
+
+model GroupAndUser {
+  userId Int 
+  groupId Int 
+  admin Boolean
+  user User@relation(fields: [userId],references: [id])
+  group Group@relation(fields: [groupId],references: [id])
+  @@id([userId, groupId])
+}
+
+model SeenBy {
+  userId Int 
+  chatId Int 
+  user User@relation(fields: [userId],references: [id])
+  chat Chat@relation(fields: [chatId],references: [id])
+  @@id([userId, chatId])
+}
+
+model GroupJoiningRequest {
+  userId Int 
+  groupId Int 
+  initiatorId Int
+  status StatusType
+  user User@relation(fields: [userId],references: [id])
+  group Group@relation(fields: [groupId],references: [id])
+  @@id([userId, groupId])
+}
+
+enum StatusType {
+  ACCEPTED
+  REJECTED
+  PENDING
+}
