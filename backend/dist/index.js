@@ -55,6 +55,7 @@ io.on('connection', (socket) => {
     }));
     socket.on('join_render', (id) => {
         console.log("Joining takes place");
+        console.log("roomId : ", id, " socketId: ", socket.id);
         socket.join(String(id));
     });
     socket.on('reject_group', (userId, groupId) => __awaiter(void 0, void 0, void 0, function* () {
@@ -63,9 +64,15 @@ io.on('connection', (socket) => {
             socket.emit("reject_group_error", "Error while rejecting");
         }
     }));
-    socket.on('message', (data) => {
-        console.log(data);
-    });
+    socket.on('message', (msg, roomId, byWhichUser) => __awaiter(void 0, void 0, void 0, function* () {
+        console.log("roomId ", roomId);
+        console.log("rooms: ", io.sockets.adapter.rooms.get(roomId));
+        io.to(roomId).emit('send-message', msg, byWhichUser, roomId);
+        const msgg = yield (0, GroupController_1.saveChat)(String(msg), "text", byWhichUser, roomId, false);
+        if (msgg.status != 200) {
+            socket.emit("save_chat_error", "Error while saving chat");
+        }
+    }));
     socket.on('disconnect', () => {
         console.log("User disconnected!!!", socket.id);
     });

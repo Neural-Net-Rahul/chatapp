@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.joinOtherGroup = exports.rejectGroup = exports.joinGroup = exports.createGroup = exports.getAllGroups = void 0;
+exports.saveChat = exports.getGroupData = exports.joinOtherGroup = exports.rejectGroup = exports.joinGroup = exports.createGroup = exports.getAllGroups = void 0;
 const app_1 = require("../app");
 const getAllGroups = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -166,3 +166,42 @@ const rejectGroup = (userId, groupId) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.rejectGroup = rejectGroup;
+const getGroupData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { groupId } = req.body;
+        const group = yield app_1.client.group.findFirst({
+            where: {
+                id: groupId
+            },
+            include: {
+                chat: true,
+                groupAndUser: {
+                    include: {
+                        user: true
+                    }
+                }
+            }
+        });
+        res.status(200).json({ message: "Sending group data...", group });
+        return;
+    }
+    catch (e) {
+        res.status(500).json({ message: "Some error occurred" });
+        return;
+    }
+});
+exports.getGroupData = getGroupData;
+const saveChat = (content, type, byWhichUser, groupId, isDeleted) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield app_1.client.chat.create({
+            data: {
+                content: String(content), type: String(type), byWhichUser: Number(byWhichUser), groupId: Number(groupId), isDeleted: Boolean(isDeleted)
+            }
+        });
+        return { status: 200, message: "Saved chat..." };
+    }
+    catch (e) {
+        return { status: 500, message: "Error" };
+    }
+});
+exports.saveChat = saveChat;

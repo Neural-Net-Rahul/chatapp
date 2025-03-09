@@ -8,4 +8,5 @@ const verifty_1 = __importDefault(require("../middlewares/verifty"));
 const GroupController_1 = require("../controllers/GroupController");
 const groupRouter = express_1.default.Router();
 groupRouter.post('/getAllGroups', verifty_1.default, GroupController_1.getAllGroups);
+groupRouter.post("/getGroupData", GroupController_1.getGroupData);
 exports.default = groupRouter;

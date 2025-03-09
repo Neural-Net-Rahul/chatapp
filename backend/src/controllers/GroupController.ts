@@ -167,4 +167,42 @@ const rejectGroup = async(userId:any, groupId:any) => {
     }
 }
 
-export {getAllGroups, createGroup, joinGroup, rejectGroup, joinOtherGroup};
+const getGroupData:RequestHandler = async(req:Request,res:Response):Promise<void> => {
+  try{
+    const {groupId} = req.body;
+    const group = await client.group.findFirst({
+      where:{
+        id:groupId
+      },
+      include:{
+        chat:true,
+        groupAndUser:{
+          include:{
+            user:true
+          }
+        }
+      }
+    })
+    res.status(200).json({message:"Sending group data...",group});
+    return;
+  }
+  catch(e){
+    res.status(500).json({message:"Some error occurred"});
+    return;
+  }
+}
+
+const saveChat = async(content:any, type:any, byWhichUser:any, groupId:any, isDeleted:any) => {
+  try{
+    await client.chat.create({
+      data:{
+        content:String(content), type:String(type), byWhichUser:Number(byWhichUser), groupId:Number(groupId), isDeleted:Boolean(isDeleted)
+      }
+    })
+    return {status:200, message:"Saved chat..."};
+  }catch(e){
+    return {status:500, message:"Error"};
+  }
+}
+
+export {getAllGroups, createGroup, joinGroup, rejectGroup, joinOtherGroup, getGroupData, saveChat};

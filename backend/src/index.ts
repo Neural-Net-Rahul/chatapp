@@ -2,7 +2,7 @@ import {app} from "./app";
 import dotenv from 'dotenv'
 import http from 'http'
 import { Server } from 'socket.io'
-import { createGroup, joinGroup, joinOtherGroup, rejectGroup } from "./controllers/GroupController";
+import { createGroup, joinGroup, joinOtherGroup, rejectGroup, saveChat } from "./controllers/GroupController";
 
 dotenv.config();
 
@@ -46,6 +46,7 @@ io.on('connection',(socket)=> {
 
     socket.on('join_render',(id) => {
         console.log("Joining takes place");
+        console.log("roomId : ", id, " socketId: ", socket.id);
         socket.join(String(id));
     })
 
@@ -56,8 +57,14 @@ io.on('connection',(socket)=> {
         }
     })
 
-    socket.on('message',(data)=>{
-        console.log(data);
+    socket.on('message',async(msg, roomId, byWhichUser)=>{
+        console.log("roomId ",roomId);
+        console.log("rooms: ", io.sockets.adapter.rooms.get(roomId));
+        io.to(roomId).emit('send-message',msg, byWhichUser, roomId);
+        const msgg = await saveChat(String(msg), "text", byWhichUser, roomId, false);
+        if(msgg.status != 200){
+            socket.emit("save_chat_error", "Error while saving chat");
+        }
     })
 
     socket.on('disconnect',() => {
